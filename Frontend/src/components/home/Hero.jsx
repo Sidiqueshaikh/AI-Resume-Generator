@@ -17,7 +17,7 @@ const Hero = () => {
                     {/* Desktop Menu */}
                     <div className='hidden sm:flex items-center gap-4 md:gap-8 max-md:text-sm text-gray-800'>
                         <a href="#" onClick={() => scrollTo(0, 0)}> Home </a>
-                        <a href="#" onClick={() => scrollTo(0, 0)}> Products </a>
+                        <a href="#" onClick={() => scrollTo(0, 0)}> Features </a>
                         <a href="#" onClick={() => scrollTo(0, 0)}> About </a>
                         <a href="#" onClick={() => scrollTo(0, 0)}> Contact </a>
                     </div>
@@ -34,7 +34,7 @@ const Hero = () => {
                 <div className={`sm:hidden fixed inset-0 ${menuOpen ? 'w-full' : 'w-0'} overflow-hidden bg-white backdrop-blur shadow-xl rounded-lg z-200 text-sm transition-all`}>
                     <div className='flex flex-col items-center justify-center h-full text-xl font-semibold gap-6 p-4'>
                         <a href='#' onClick={() => scrollTo(0, 0)}> Home </a>
-                        <a href='#' onClick={() => scrollTo(0, 0)}> Products </a>
+                        <a href='#' onClick={() => scrollTo(0, 0)}> Features </a>
                         <a href='#' onClick={() => scrollTo(0, 0)}> About </a>
                         <a href='#' onClick={() => scrollTo(0, 0)}> Contact </a>
                         <Link to='/app?state=login' className='cursor-pointer px-8 py-2 bg-blue-500 hover:bg-blue-600 transition text-white rounded-full'>Login</Link>
