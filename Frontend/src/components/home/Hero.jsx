@@ -48,7 +48,7 @@ const Hero = () => {
             <div className="rethink relative flex flex-col items-center justify-center text-sm px-4 md:px-16 lg:px-24 xl:px-40 text-gray-800">
 
                 {/* Avatars + Stars */}
-               {/* <div className="flex items-center mt-24 md:mt-36">
+                <div className="flex items-center mt-24 md:mt-36">
                     <div className="flex -space-x-3 pr-3">
                         <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200" alt="user3" className="size-8 object-cover rounded-full border-2 border-white hover:-translate-y-0.5 transition z-1" />
                         <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200" alt="user1" className="size-8 object-cover rounded-full border-2 border-white hover:-translate-y-0.5 transition z-2" />
@@ -65,11 +65,11 @@ const Hero = () => {
                         </div>
                         <p className="text-sm text-gray-700"> Used by 10,000+ users </p>
                     </div>
-                </div>*/}
+                </div>
 
                 {/* Headline */}
                                 <h1 className="text-4xl md:text-6xl font-semibold max-w-lg md:max-w-2xl text-center mt-4 leading-tight md:leading-tight">
-                                    Land your dream job with  <span className="relative bg-linear-to-r from-purple-700 to-[#764de1] bg-clip-text text-transparent">
+                                Land your dream job with  <span className="relative bg-linear-to-r from-purple-700 to-[#764de1] bg-clip-text text-transparent">
                     
                         <div className="z-10 absolute bottom-0 left-0 w-full scale-120" >
                             <img src='https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/hero/gradient_arc.svg' alt="gradient" />
