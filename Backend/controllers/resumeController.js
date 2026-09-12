@@ -1,4 +1,7 @@
+import imageKit from "../configs/imageKit.js";
 import resume from "../models/resume.js"
+import fs from "fs"
+
 
 //contoller for creating a new resume
 //POST: /api/resumes/create
@@ -84,6 +87,22 @@ export const updateResume = async (req, res) => {
 
         let resumeDataCopy = JSON.parse(resumeData)
         
+        if(image){
+
+            const imageBufferData = fs.createReadStream(image.path);
+            
+            const response = await imageKit.files.upload({
+                    file: imageBufferData,
+                    fileName: 'resume.jpg',
+                    folder: 'user-resumes',
+                    transformation:{
+                        pre:'w-300,h-300,fo-face,z-0.75' + (removeBackground ? ',e-bgremove' : '')
+                    }
+                });
+
+        resumeDataCopy.personal_info.image = response.url;
+    }
+
         const resume = await resume.findOneAndUpdate({userId,_id:resumeId},resumeDataCopy,{new:true})
 
         return res.status(200).json({message:'Saved Successfully',resume})
