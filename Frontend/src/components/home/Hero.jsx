@@ -1,8 +1,11 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
 const Hero = () => {
    
+    const {user} = useSelector(state => state.auth)
+
     const [menuOpen, setMenuOpen] = React.useState(false)
 
    
@@ -23,7 +26,10 @@ const Hero = () => {
                     </div>
 
                     <div>
-                        <Link to='/app?state=login' className='max-sm:hidden cursor-pointer px-8 py-2 bg-blue-500 hover:bg-blue-600 transition text-white rounded-full'>Login</Link>
+                        <Link to='/app?state=login' className='max-sm:hidden cursor-pointer px-8 py-2 bg-blue-500 hover:bg-blue-600 transition text-white rounded-full' hidden={user}>Login</Link>
+                        <Link to='/app' className='hidden md:block px-8 py-2 bg-green-500 hover:bg-green-700 active:scale-95 transition-all rounded-full text-white' hidden={!user}>
+                        Dashboard
+                        </Link>
                         <button onClick={() => setMenuOpen(true)} className="md:hidden active:scale-95 transition">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:hidden"><path d="M4 5h16" /><path d="M4 12h16" /><path d="M4 19h16" /></svg>
                         </button> 
