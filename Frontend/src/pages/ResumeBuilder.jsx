@@ -1,5 +1,4 @@
-import React, { useEffect ,useState} from 'react'
-import { dummyResumeData } from '../assets/assets'
+import { useEffect ,useState} from 'react'
 import { Link,useParams } from 'react-router-dom'
 import { ArrowLeftIcon, Briefcase, ChevronLeft, ChevronRight, DownloadIcon, EyeIcon, EyeOffIcon, FileText, FolderIcon, GraduationCap, Share2Icon, Sparkles, User } from 'lucide-react'
 import PersonalInfoForm from '../components/PersonalInfoForm'
@@ -13,6 +12,7 @@ import ProjectForm from '../components/ProjectForm'
 import SkillsForm from '../components/SkillsForm'
 import { useSelector } from 'react-redux'
 import api from '../configs/api'
+import toast from 'react-hot-toast'
 
 const ResumeBuilder = () => {
 
@@ -40,8 +40,11 @@ const ResumeBuilder = () => {
         Authorization:token
       }}) 
       if(data.resume){
-        setResumeData(data.resume)
-        document.title = data.resume.title;
+        const loadedResume = data.resume
+        loadedResume.project ??= loadedResume.projects ?? []
+        loadedResume.accent_color ??= loadedResume.assest_color
+        setResumeData(loadedResume)
+        document.title = loadedResume.title;
       }
     } catch (error) {
       console.log(error.message)
@@ -70,7 +73,7 @@ const ResumeBuilder = () => {
   const changeResumeVisibility=async()=>{
     try {
       const formData = new FormData()
-      formData.append("resumeId",resume.Id)
+      formData.append("resumeId",resumeId)
       formData.append("resumeData",JSON.stringify({public: !resumeData.public}))
 
       const {data} = await api.put('/api/resumes/update'  , formData,{headers:{
@@ -80,7 +83,7 @@ const ResumeBuilder = () => {
       setResumeData({...resumeData, public:!resumeData.public})
       toast.success(data.message)
     } catch (error) {
-      console.error("Error saving resume:",error)
+      toast.error(error?.response?.data?.message || error.message)
     }
   }
    
@@ -112,8 +115,8 @@ const ResumeBuilder = () => {
       const formData = new FormData();
       formData.append("resumeId",resumeId)
       formData.append('resumeData',JSON.stringify(updatedResumeData))
-      removeBackground && formData.append("removeBackgound","yes");
-      typeof resumeData.personal_info.iamge === 'object' && formData.append("image",resumeData.personal_info.image)
+      removeBackground && formData.append("removeBackground","yes");
+      typeof resumeData.personal_info.image === 'object' && formData.append("image",resumeData.personal_info.image)
 
       const {data} = await api.put('/api/resumes/update', formData,{headers:{
         Authorization:token
@@ -122,7 +125,7 @@ const ResumeBuilder = () => {
       setResumeData(data.resume)
       toast.success(data.message)
     } catch (error) {
-      console.error("Error saving resume:",error)
+      toast.error(error?.response?.data?.message || error.message)
     }
   }
     

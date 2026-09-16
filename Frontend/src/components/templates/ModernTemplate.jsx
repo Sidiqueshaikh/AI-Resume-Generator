@@ -1,4 +1,5 @@
 import { Mail, Phone, MapPin,  Globe, Link2 } from "lucide-react";
+import ProfileImage from "../ProfileImage";
 
 const ModernTemplate = ({ data, accentColor }) => {
 	const formatDate = (dateStr) => {
@@ -14,6 +15,7 @@ const ModernTemplate = ({ data, accentColor }) => {
 		<div className="max-w-4xl mx-auto bg-white text-gray-800">
 			{/* Header */}
 			<header className="p-8 text-white" style={{ backgroundColor: accentColor }}>
+				{data.personal_info?.image && <ProfileImage image={data.personal_info.image} className="w-24 h-24 rounded-full object-cover mb-4" />}
 				<h1 className="text-4xl font-light mb-3">
 					{data.personal_info?.full_name || "Your Name"}
 				</h1>

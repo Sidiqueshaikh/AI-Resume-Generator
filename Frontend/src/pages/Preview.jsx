@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { dummyResumeData } from '../assets/assets'
 import ResumePreview from '../components/ResumePreview'
 import Loader from '../components/Loader'
 import { ArrowLeftIcon } from 'lucide-react'
+import api from '../configs/api'
 
 const Preview = () => {
   const {resumeId} = useParams()
@@ -15,7 +15,10 @@ const Preview = () => {
   const loadResume = async ()=>{
    try {
     const {data} = await api.get('/api/resumes/public/' + resumeId)
-    setResumeData(data.resume)
+    const loadedResume = data.resume
+    loadedResume.project ??= loadedResume.projects ?? []
+    loadedResume.accent_color ??= loadedResume.assest_color
+    setResumeData(loadedResume)
 
    } catch (error) {
     console.log(error.message)
@@ -30,7 +33,7 @@ const Preview = () => {
   return resumeData ? (
     <div className='bg-slate-100'>
       <div className='max-w-3xl mx-auto py-10'>
-          <ResumePreview  data={resumeData} template={resumeData.template} accentColor={resumeData.accent_Color} classes='py-4 bg-white'/>
+          <ResumePreview  data={resumeData} template={resumeData.template} accentColor={resumeData.accent_color} classes='py-4 bg-white'/>
       </div>
      
     </div>

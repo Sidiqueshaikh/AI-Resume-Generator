@@ -1,6 +1,8 @@
 import { Loader2, Sparkles } from 'lucide-react'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useSelector } from 'react-redux'
+import api from '../configs/api'
+import toast from 'react-hot-toast'
 
 const ProfessionalSummaryForm = ({data, onChange, setResumeData}) => {
     
@@ -10,11 +12,16 @@ const ProfessionalSummaryForm = ({data, onChange, setResumeData}) => {
     const generateSummary = async()=>{
         try {
             setIsGenerating(true)
-            const prompt = `enhance my professionnal summary "${data}" `;
+            const summary = data?.trim();
+            if (!summary) {
+                toast.error('Add a professional summary before enhancing it')
+                return
+            }
+            const prompt = `Enhance my professional summary: "${summary}"`;
             const response = await api.post('/api/ai/enhance-pro-sum',{userContent:prompt},{headers:{ Authorization:token }})
             setResumeData(prev => ({...prev,professional_summary: response.data.enhancedContent})) 
         } catch (error) {
-            Toast.error(error?.response?.data?.message || error.message)
+            toast.error(error?.response?.data?.message || error.message)
         }
         finally{
             setIsGenerating(false)
@@ -32,8 +39,6 @@ const ProfessionalSummaryForm = ({data, onChange, setResumeData}) => {
                 {isGenerating ? (<Loader2 className="size-4 animate-spin"/>) : (<Sparkles  className='size-4'/>)}
                 {isGenerating ? "Enhancing..." : "AI Enhance"}
                 
-                AI Enhance
-
             </button>
         </div>
 
