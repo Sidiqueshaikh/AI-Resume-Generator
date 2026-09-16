@@ -1,10 +1,33 @@
 import { BriefcaseBusiness, Mail, MapPin, Phone, User, Globe, Link2 } from 'lucide-react'
-import React from 'react'
+import { useEffect, useMemo } from 'react'
+import toast from 'react-hot-toast'
 
 const PersonalInfoForm = ({data, onChange, removeBackground, setRemoveBackground}) => {
+    const imagePreview = useMemo(() => {
+      if (!data.image) return ''
+      return typeof data.image === 'string' ? data.image : URL.createObjectURL(data.image)
+    }, [data.image])
+
+    useEffect(() => {
+      return typeof data.image === 'string' || !imagePreview ? undefined : () => URL.revokeObjectURL(imagePreview)
+    }, [data.image, imagePreview])
   
     const handleChange=(field,value)=>{
         onChange({...data, [field]: value})
+    }
+
+    const handleImageChange = (event) => {
+      const file = event.target.files?.[0]
+      if (!file) return
+      if (!['image/jpeg', 'image/png'].includes(file.type)) {
+        toast.error('Please select a JPEG or PNG image')
+        return
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image must be smaller than 5 MB')
+        return
+      }
+      handleChange('image', file)
     }
 
     const fields=[
@@ -23,14 +46,14 @@ const PersonalInfoForm = ({data, onChange, removeBackground, setRemoveBackground
       <div className='flex items-center gap-2'>
       <label>
         {data.image ? (
-            <img src={typeof data.image==='string' ? data.image : URL.createObjectURL(data.image)} alt="user-image"  className='w-16 h-16 rounded-full object-cover mt-5 ring ring-slate-300 hover:opacity-80'/>
+            <img src={imagePreview} alt="user-image"  className='w-16 h-16 rounded-full object-cover mt-5 ring ring-slate-300 hover:opacity-80'/>
         ): (
             <div className='inline-flex items-center gap-2 mt-5 text-slate-600 hover:text-slate-700 cursor-pointer'>
                 <User className='size-10 p-2.5 border rounded-full'/>
                 Upload user image
             </div>
         )}
-        <input type="file" accept="image/jpeg, image/png" className="hidden" onChange={(e)=>handleChange("image", e.target.files[0]) }/>
+        <input type="file" accept="image/jpeg, image/png" className="hidden" onChange={handleImageChange}/>
 
 
       </label>

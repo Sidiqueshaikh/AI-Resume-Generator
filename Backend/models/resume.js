@@ -5,7 +5,9 @@ const ResumeSchema = new mongoose.Schema({
     title:{type:String,default:"Untitled Resume"},
     public:{type:Boolean,default:false},
     template:{type:String,default:"Classic"},
-    assest_color:({type:String,default:"#3B82F6"}),
+    // Keep the corrected field while retaining the legacy spelling for old documents.
+    accent_color:{type:String,default:"#3B82F6"},
+    assest_color:{type:String},
     professional_summary:{type:String,default:""},
     skills:[{type:String}],
     personal_info:{
@@ -30,6 +32,12 @@ const ResumeSchema = new mongoose.Schema({
 
     ],
     projects:[{
+        project_name:{type:String},
+        type:{type:String},
+        description:{type:String},
+    }],
+    project:[{
+        name:{type:String},
         project_name:{type:String},
         type:{type:String},
         description:{type:String},

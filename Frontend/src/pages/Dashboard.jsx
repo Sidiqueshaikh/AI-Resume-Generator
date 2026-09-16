@@ -56,8 +56,16 @@ const Dashboard = () => {
   }
   const uploadResume= async(event)=>{
     event.preventDefault()
+    if (!resume) {
+      toast.error('Please select a PDF resume first')
+      return
+    }
+    setIsLoading(true)
     try {
       const resumeText = await pdfToText(resume)
+      if (!resumeText?.trim()) {
+        throw new Error('Could not extract text from this PDF. Please use a text-based PDF.')
+      }
       const {data} =await api.post('/api/ai/upload-resume',{title, resumeText},{headers:{
         Authorization:token
       }})
@@ -67,8 +75,9 @@ const Dashboard = () => {
       navigate(`/app/builder/${data.resumeId}`)
     } catch (error) {
       toast.error(error?.response?.data?.message || error.message)
+    } finally {
+      setIsLoading(false)
     }
-    setIsLoading(false)
   }
 
   const editTitle= async(event)=>{
@@ -168,7 +177,7 @@ const Dashboard = () => {
 
       
       {showUploadResume && (
-        <form onSubmit={uploadResume}  onClick={()=> setShowUploadResume(false)} className='fixed inset-0 bg-black/50 backdrop-blur bg-opacity-50 z-10 flex items-center justify-center'>
+        <form onSubmit={uploadResume}  onClick={()=> !isLoading && setShowUploadResume(false)} className='fixed inset-0 bg-black/50 backdrop-blur bg-opacity-50 z-10 flex items-center justify-center'>
         <div onClick={e => e.stopPropagation()} className='relative bg-slate-50 border shadow-md rounded-lg w-full max-w-sm p-6'>
               <h2 className='text-xl font-bold mb-4'>Upload Resume</h2>
               <input onChange={(e) => setTitle(e.target.value)} value={title} type="text" placeholder='Enter resume title' className='w-full px-4 py-2 mb-4 focus:border-blue-600 ring-blue-600' required/>
@@ -188,7 +197,7 @@ const Dashboard = () => {
                   </div>
                 </label>
 
-                <input type="file" id="resume-input" accept='.pdf'  hidden onChange={(e) => setResume(e.target.files[0])}/>
+                <input type="file" id="resume-input" accept='.pdf,application/pdf'  hidden onChange={(e) => setResume(e.target.files?.[0] || null)}/>
 
 
               </div>
@@ -198,7 +207,7 @@ const Dashboard = () => {
                 
                 </button>
 
-              <XIcon className='absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer transition-colors' onClick={() => {setShowUploadResume(false);setTitle("")}}/>
+              <XIcon className={`absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors ${isLoading ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`} onClick={() => {if (!isLoading) {setShowUploadResume(false);setTitle("");setResume(null)}}}/>
         </div>
         </form>
       )

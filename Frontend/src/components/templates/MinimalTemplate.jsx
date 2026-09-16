@@ -1,4 +1,6 @@
 
+import ProfileImage from "../ProfileImage";
+
 const MinimalTemplate = ({ data, accentColor }) => {
     const formatDate = (dateStr) => {
         if (!dateStr) return "";
@@ -13,6 +15,7 @@ const MinimalTemplate = ({ data, accentColor }) => {
         <div className="max-w-4xl mx-auto p-8 bg-white text-gray-900 font-light">
             {/* Header */}
             <header className="mb-10">
+                {data.personal_info?.image && <ProfileImage image={data.personal_info.image} className="w-24 h-24 rounded-full object-cover mb-4" />}
                 <h1 className="text-4xl font-thin mb-4 tracking-wide">
                     {data.personal_info?.full_name || "Your Name"}
                 </h1>

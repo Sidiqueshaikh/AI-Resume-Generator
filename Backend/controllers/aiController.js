@@ -1,6 +1,34 @@
 import resume from "../models/resume.js"
 import ai from "../configs/ai.js"
 
+const aiModel = process.env.OPENAI_MODEL || process.env.GEMINI_MODEL || "gemini-2.0-flash";
+
+const requireAI = (res) => {
+    if (!ai) {
+        res.status(503).json({message:'AI service is not configured. Set GEMINI_API_KEY or OPENAI_API_KEY on the backend.'});
+        return false;
+    }
+    return true;
+}
+
+const getAIContent = (response) => response?.choices?.[0]?.message?.content?.trim();
+
+const aiErrorMessage = (error) => {
+    const status = error?.status || error?.response?.status;
+    if (status === 401 || error?.code === 'invalid_api_key') {
+        return 'AI authentication failed. Check GEMINI_API_KEY and OPENAI_BASEURL. Gemini must use https://generativelanguage.googleapis.com/v1beta/openai/.';
+    }
+    if (status === 404) {
+        return 'The configured AI model or endpoint was not found. Check OPENAI_MODEL and OPENAI_BASEURL.';
+    }
+    return error?.message || 'The AI service request failed';
+}
+
+const parseAIJson = (content) => {
+    const normalized = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    return JSON.parse(normalized);
+}
+
 //contoller for enhancing resume using AI
 //POST: /api/ai/enhance-pro-sum
 
@@ -13,9 +41,10 @@ export const enhanceProfessionalSummary = async (req, res) => {
         if(!userContent){
             return res.status(400).json({message:'missing required fields'})
         }
+        if (!requireAI(res)) return;
 
         const response = await ai.chat.completions.create({
-            model: process.env.OPENAI_MODEL,
+            model: aiModel,
             messages: [
                 {   role: "system",
                     content:  "You are an expert in resume writing.Your task is to enhance the professional summary of a resume. The summary should be 1-2 sentences also highlighting key skills,experience, and career objectives. Make it compelling and ATS-friendly. and only return text no options or anything else."
@@ -27,10 +56,13 @@ export const enhanceProfessionalSummary = async (req, res) => {
             ],
         })
 
-        const enhancedContent = response.choices[0].message.content
+        const enhancedContent = getAIContent(response)
+        if (!enhancedContent) {
+            return res.status(502).json({message:'AI returned an empty response'})
+        }
         return res.status(200).json({enhancedContent})
     }catch(error){
-        return res.status(400).json({message:error.message})
+        return res.status(502).json({message:aiErrorMessage(error)})
     }
 }
 
@@ -44,9 +76,10 @@ export const enhanceJobDescription = async (req, res) => {
         if(!userContent){
             return res.status(400).json({message:'missing required fields'})
         }
+        if (!requireAI(res)) return;
 
         const response = await ai.chat.completions.create({
-            model: process.env.OPENAI_MODEL,
+            model: aiModel,
             messages: [
                 {   role: "system",
                     content:  "You are an expert in resume writing.Your task is to enhance the job description of a resume. The job description should be only in 1-2 sentence also highlighting key responsibilities and achievements. Use action verbs and quantifiable results where possible. Make it ATS-friendly. and only return text no options or anything else."
@@ -58,10 +91,13 @@ export const enhanceJobDescription = async (req, res) => {
             ],
         })
 
-        const enhancedContent = response.choices[0].message.content
+        const enhancedContent = getAIContent(response)
+        if (!enhancedContent) {
+            return res.status(502).json({message:'AI returned an empty response'})
+        }
         return res.status(200).json({enhancedContent})
     }catch(error){
-        return res.status(400).json({message:error.message})
+        return res.status(502).json({message:aiErrorMessage(error)})
     }
 }
 
@@ -71,12 +107,14 @@ export const enhanceJobDescription = async (req, res) => {
 export const uploadResume = async (req, res) => {
     try{
 
-        const {resumeText,title} =  req.body;
+        const {resumeText,title: rawTitle} =  req.body;
         const userId = req.userId
+        const title = rawTitle?.trim();
 
-        if(!resumeText){
-            return res.status(400).json({messagee:'missing required fields'})
+        if(!resumeText || !title){
+            return res.status(400).json({message:'Resume title and resume content are required'})
         }
+        if (!requireAI(res)) return;
             
         const systemPrompt = "You are an expert AI agent to extract data from resume."
 
@@ -122,7 +160,7 @@ export const uploadResume = async (req, res) => {
         }
         `;
         const response = await ai.chat.completions.create({
-            model: process.env.OPENAI_MODEL,
+            model: aiModel,
             messages: [
                 {   role: "system",
                     content:  systemPrompt
@@ -135,12 +173,21 @@ export const uploadResume = async (req, res) => {
             response_format: {type:'json_object'}
         })
 
-        const extractedData = response.choices[0].message.content
-        const parsedData = JSON.parse(extractedData)
+        const extractedData = getAIContent(response)
+        if (!extractedData) {
+            return res.status(502).json({message:'AI returned no resume data'})
+        }
+        const parsedData = parseAIJson(extractedData)
+        if (!parsedData.project && parsedData.projects) {
+            parsedData.project = parsedData.projects.map((project) => ({
+                ...project,
+                name: project.name ?? project.project_name ?? "",
+            }));
+        }
         const newResume = await resume.create({userId, title, ...parsedData})
         
         res.json({resumeId: newResume._id})
     }catch(error){
-        return res.status(400).json({message:error.message})
+        return res.status(502).json({message:aiErrorMessage(error)})
     }
 }

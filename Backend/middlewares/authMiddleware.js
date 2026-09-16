@@ -7,7 +7,12 @@ const protect = (req, res, next) => {
     }
     try{
         const decoded = jwt.verify(token,process.env.JWT_SECRET)
-        req.user = decoded.userId;
+        // Tokens are issued with an `id` claim in userController. Keep the
+        // authenticated user id in the property consumed by all controllers.
+        req.userId = decoded.id;
+        if (!req.userId) {
+            return res.status(401).json({message:'unauthorized'})
+        }
         next();
     }catch(error){
         return res.status(401).json({message:'unauthorized'})
