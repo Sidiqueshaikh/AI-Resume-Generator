@@ -15,16 +15,34 @@ const requireAI = (res) => {
 // The native SDK returns plain text on response.text, not response.choices[0].message.content
 const getAIContent = (response) => response?.text?.trim();
 
+const parseGeminiErrorMessage = (message) => {
+    if (!message) return null;
+    try {
+        // Gemini SDK sometimes puts the raw JSON error blob into error.message
+        const jsonStart = message.indexOf('{');
+        if (jsonStart === -1) return null;
+        const parsed = JSON.parse(message.slice(jsonStart));
+        return parsed?.error?.message || null;
+    } catch {
+        return null;
+    }
+}
+
 const aiErrorMessage = (error) => {
     const status = error?.status || error?.response?.status;
-    const message = error?.message || '';
-    if (status === 401 || status === 403 || /API key not valid|UNAUTHENTICATED/i.test(message)) {
+    const rawMessage = error?.message || '';
+    const innerMessage = parseGeminiErrorMessage(rawMessage) || rawMessage;
+
+    if (status === 401 || status === 403 || /API key not valid|UNAUTHENTICATED/i.test(innerMessage)) {
         return 'AI authentication failed. Check that GEMINI_API_KEY is a valid, current Gemini API key.';
     }
-    if (status === 404 || /not found/i.test(message)) {
+    if (status === 404 || /not found/i.test(innerMessage)) {
         return 'The configured AI model was not found. Check GEMINI_MODEL is a currently supported model.';
     }
-    return message || 'The AI service request failed';
+    if (status === 503 || /UNAVAILABLE|overloaded|high demand/i.test(innerMessage)) {
+        return 'The AI service is temporarily busy due to high demand. Please try again in a moment.';
+    }
+    return innerMessage || 'The AI service request failed';
 }
 
 const parseAIJson = (content) => {
