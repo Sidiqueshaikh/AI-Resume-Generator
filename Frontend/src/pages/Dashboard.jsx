@@ -1,13 +1,13 @@
-import { FilePenLineIcon, LoaderCircleIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloud, UploadCloudIcon,XIcon } from 'lucide-react'
+import { FilePenLineIcon, GaugeIcon, LoaderCircleIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloud, UploadCloudIcon,XIcon } from 'lucide-react'
 import React from 'react'
 import { useState,useEffect } from 'react'
-import { dummyResumeData } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import api from '../configs/api'
 import toast from 'react-hot-toast'
 import  pdfToText from 'react-pdftotext'
 import Loader from '../components/Loader'
+import AtsCheckModal from '../components/AtsCheckModal'
 
 
 const Dashboard = () => {
@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false)
   const navigate=useNavigate()
 
+  const [showAts, setShowAts] = useState(false)
 
   const loadAllResumes= async()=>{
     try {
@@ -136,7 +137,10 @@ const Dashboard = () => {
            <UploadCloudIcon className="size-11 transition-all duration-300 p-2.5 bg-linear-to-br from-purple-300 to-purple-500 text-white rounded-full"/>
            <p className='text-sm group-hover:text-purple-600 transition-all duration-300'>Upload Existing</p>
          </button>
-         
+        <button onClick={()=> setShowAts(true)} className='w-full bg-white sm:max-w-36 h-48 flex flex-col items-center justify-center gap-2 rounded-lg text-slate-600 border border-dashed border-slate-300 group hover:border-green-500 hover:shadow-lg transition-all duration-300 cursor-pointer'>
+          <GaugeIcon className="size-11 transition-all duration-300 p-2.5 bg-linear-to-br from-green-300 to-green-500 text-white rounded-full"/>
+          <p className='text-sm group-hover:text-green-600 transition-all duration-300'>Check ATS Score</p>
+        </button>
       </div>
 
       <hr className='border-slate-300 my-6 sm:w-76.25'/>
@@ -229,6 +233,9 @@ const Dashboard = () => {
 
       }
     </div>
+    {showAts && (
+      <AtsCheckModal resumes={allResumes} onClose={() => setShowAts(false)} />
+    )}
     </div>
   )
 }

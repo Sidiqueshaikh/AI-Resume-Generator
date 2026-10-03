@@ -2,9 +2,9 @@ import resume from "../models/resume.js"
 import ai from "../configs/ai.js"
 
 
-const aiModel = process.env.GEMINI_MODEL || "gemini-3.5-flash";
+export const aiModel = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 
-const requireAI = (res) => {
+export const requireAI = (res) => {
     if (!ai) {
         res.status(503).json({message:'AI service is not configured. Set GEMINI_API_KEY on the backend.'});
         return false;
@@ -12,13 +12,13 @@ const requireAI = (res) => {
     return true;
 }
 
-// The native SDK returns plain text on response.text, not response.choices[0].message.content
-const getAIContent = (response) => response?.text?.trim();
+
+export const getAIContent = (response) => response?.text?.trim();
 
 const parseGeminiErrorMessage = (message) => {
     if (!message) return null;
     try {
-        // Gemini SDK sometimes puts the raw JSON error blob into error.message
+        
         const jsonStart = message.indexOf('{');
         if (jsonStart === -1) return null;
         const parsed = JSON.parse(message.slice(jsonStart));
@@ -28,7 +28,7 @@ const parseGeminiErrorMessage = (message) => {
     }
 }
 
-const aiErrorMessage = (error) => {
+export const aiErrorMessage = (error) => {
     const status = error?.status || error?.response?.status;
     const rawMessage = error?.message || '';
     const innerMessage = parseGeminiErrorMessage(rawMessage) || rawMessage;
@@ -45,7 +45,7 @@ const aiErrorMessage = (error) => {
     return innerMessage || 'The AI service request failed';
 }
 
-const parseAIJson = (content) => {
+export const parseAIJson = (content) => {
     const normalized = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
     return JSON.parse(normalized);
 }
